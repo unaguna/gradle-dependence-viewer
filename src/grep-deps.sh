@@ -46,22 +46,23 @@ source "$SCRIPT_DIR/libs/ana-gradle.sh"
 ################################################################################
 
 function usage_exit () {
-    echo "Usage:" "$(basename "$0") -d <dependencies_directory> <keyword>" 1>&2
+    echo "Usage:" "$(basename "$0") -d <dependencies_directory> <keywords> [...]" 1>&2
     exit "$1"
 }
 
 function echo_help () {
     echo "$GRADLE_DEPENDENCE_VIEWER_APP_NAME $GRADLE_DEPENDENCE_VIEWER_VERSION"
     echo ""
-    echo "Usage:" "$(basename "$0") -d <dependencies_directory> <keyword>"
+    echo "Usage:" "$(basename "$0") -d <dependencies_directory> <keywords> [...]"
     echo ""
     echo "Options"
     echo "    -d <dependencies_directory> :"
     echo "         (Required) Path of the directory where the dependence trees have been output."
     echo ""
     echo "Arguments"
-    echo "    <keyword> :"
-    echo "         (Required) The keyword which you are looking for."
+    echo "    <keywords> [...] :"
+    echo "         (Required) The keywords which you are looking for. If more than one is"
+    echo "         specified, dependencies containing one or more of them is extracted."
 }
 
 # Output an information
@@ -134,7 +135,7 @@ if [ "$invalid_option_flg" -eq 0 ]; then
     usage_exit 1
 fi
 
-if [ "$argc" -ne 1 ]; then
+if [ "$argc" -lt 1 ]; then
     usage_exit 1
 fi
 
