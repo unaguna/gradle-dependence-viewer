@@ -1,0 +1,10 @@
+rootProject {
+    task 'projectlist' {
+        doFirst {
+            def output = file(getProperty("jp.unaguna.prjoutput"))
+            allprojects {
+                output.append "${project.path} ${projectDir.absolutePath}\n"
+            }
+        }
+    }
+}

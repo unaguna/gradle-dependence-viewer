@@ -1,0 +1,42 @@
+name: CHECK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Checkout an example gradle project
+        uses: actions/checkout@v3
+        with:
+          repository: 'unaguna/gradle-example'
+          path: 'gradle-example'
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3.1.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Build
+        run: ./build.sh
+
+      - name: Run collect-deps.sh
+        run: |
+          cd build/release
+          tar -xzf $(ls -1 | head -n 1)
+          ./collect-deps.sh -d result $GITHUB_WORKSPACE/gradle-example
