@@ -323,7 +323,7 @@ sort "$tmp_project_list_path" -o "$tmp_project_list_path"
 
 # get task list
 echo_info "Loading task list"
-"$gradle_exe" tasks --all < /dev/null | awk -F ' ' '{print $1}' >> "$tmp_tasks_path"
+"$gradle_exe" tasklist --init-script "$INIT_GRADLE" "-Pjp.unaguna.taskoutput=$tmp_tasks_path" < /dev/null > /dev/null
 
 # Read each build.gradle and run each :dependencies.
 while read -r project_row; do
