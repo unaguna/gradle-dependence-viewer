@@ -1,7 +1,7 @@
+abspath
 deps
 dfor
 prjoutput
 projectlist
-readlink
 temurin
 unaguna
