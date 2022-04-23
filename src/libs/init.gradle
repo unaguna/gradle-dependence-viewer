@@ -7,4 +7,15 @@ rootProject {
             }
         }
     }
+
+    task 'tasklist' {
+        doFirst {
+            def output = file(getProperty("jp.unaguna.taskoutput"))
+            allprojects {
+                tasks.forEach { task ->
+                    output.append "${task.path}\n"
+                }
+            }
+        }
+    }
 }

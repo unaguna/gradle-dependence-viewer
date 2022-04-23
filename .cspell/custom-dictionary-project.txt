@@ -1,6 +1,9 @@
+abspath
 deps
 dfor
 prjoutput
 projectlist
+tasklist
+taskoutput
 temurin
 unaguna

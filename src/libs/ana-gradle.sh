@@ -5,7 +5,7 @@
 #
 # Arguments
 #   $1 - A task name. It can start with ':', such as ":sub-project:test". 
-#   $2 - the path of output of `gradle tasks`
+#   $2 - the path of task list
 #
 # Returns
 #   Returns 0 if specified task exists. Returns 1 otherwise.
@@ -14,7 +14,7 @@ function task_exists() {
     local -r task_list_path=$2
 
     set +e
-    grep -e "^$task_name$" "$task_list_path" &> /dev/null
+    grep -e "^:$task_name$" "$task_list_path" &> /dev/null
     result=$?
     set -e
 
