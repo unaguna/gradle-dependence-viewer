@@ -188,7 +188,7 @@ readonly INIT_GRADLE="$SCRIPT_DIR/libs/init.gradle"
 ################################################################################
 declare -i argc=0
 declare -a argv=()
-output_dir=
+output_dir_list=()
 help_flg=1
 invalid_option_flg=1
 while (( $# > 0 )); do
@@ -200,7 +200,7 @@ while (( $# > 0 )); do
             ;;
         -*)
             if [[ "$1" == '-d' ]]; then
-                output_dir="$2"
+                output_dir_list+=( "$2" )
                 shift
             elif [[ "$1" == "--help" ]]; then
                 help_flg=0
@@ -243,11 +243,13 @@ fi
 readonly main_project_dir="${argv[0]}"
 
 # (Required) Output destination directory path
-if [ -n "${output_dir:-""}" ]; then
+# it must be given only once; no more once
+if [ "${#output_dir_list[@]}" -ne 1 ] || [ -z "${output_dir_list[0]:-""}" ]; then
+    usage_exit 1
+else
+    output_dir="${output_dir_list[0]}"
     output_dir=$(abspath "$ORIGINAL_PWD" "$output_dir")
     readonly output_dir
-else
-    usage_exit 1
 fi
 
 

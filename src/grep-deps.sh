@@ -119,7 +119,7 @@ function echo_err() {
 ################################################################################
 declare -i argc=0
 declare -a argv=()
-dependencies_dir=
+dependencies_dir_list=()
 help_flg=1
 invalid_option_flg=1
 while (( $# > 0 )); do
@@ -131,7 +131,7 @@ while (( $# > 0 )); do
             ;;
         -*)
             if [[ "$1" == '-d' ]]; then
-                dependencies_dir="$2"
+                dependencies_dir_list+=( "$2" )
                 shift
             elif [[ "$1" == "--help" ]]; then
                 help_flg=0
@@ -171,14 +171,14 @@ if [ "$argc" -lt 1 ]; then
     usage_exit 1
 fi
 
-# Make output_dir absolute path in order to not depend on the current directory
-# (Assume that the current directory will change.)
-if [ -n "${dependencies_dir:-""}" ]
-then
+# (Required) destination directory path
+# it must be given only once; no more once
+if [ "${#dependencies_dir_list[@]}" -ne 1 ] || [ -z "${dependencies_dir_list[0]:-""}" ]; then
+    usage_exit 1
+else
+    dependencies_dir="${dependencies_dir_list[0]}"
     dependencies_dir=$(cd "$ORIGINAL_PWD"; cd "$(dirname "$dependencies_dir")"; pwd)"/"$(basename "$dependencies_dir")
     readonly dependencies_dir
-else
-    usage_exit 1
 fi
 
 
