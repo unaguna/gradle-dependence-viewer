@@ -69,6 +69,9 @@ readonly GRADLE_DEPENDENCE_VIEWER_APP_NAME
 # Include
 ################################################################################
 
+# shellcheck source=libs/files.sh
+source "$SCRIPT_DIR/libs/files.sh"
+
 # shellcheck source=libs/ana-gradle.sh
 source "$SCRIPT_DIR/libs/ana-gradle.sh"
 
@@ -110,24 +113,6 @@ function echo_info () {
 # any messages should be output to stderr.
 function echo_err() {
     echo "$SCRIPT_NAME: $*" >&2
-}
-
-# Get absolute path
-#
-# Arguments
-#   $1 - base path
-#   $2 - relative path
-#
-# Standard Output
-#   the absolute path
-function abspath() {
-    local -r base_path=$1
-    local -r relative_path=$2
-
-    abs_dir=$(cd "$base_path"; cd "$(dirname "$relative_path")"; pwd)
-    filename=$(basename "$relative_path")
-
-    echo "$abs_dir/$filename"
 }
 
 # Output the name of the file to be used as the output destination for stdout of gradle task.

@@ -69,6 +69,9 @@ readonly GRADLE_DEPENDENCE_VIEWER_APP_NAME
 # Include
 ################################################################################
 
+# shellcheck source=libs/files.sh
+source "$SCRIPT_DIR/libs/files.sh"
+
 # shellcheck source=libs/ana-gradle.sh
 source "$SCRIPT_DIR/libs/ana-gradle.sh"
 
@@ -177,7 +180,7 @@ if [ "${#dependencies_dir_list[@]}" -ne 1 ] || [ -z "${dependencies_dir_list[0]:
     usage_exit 1
 else
     dependencies_dir="${dependencies_dir_list[0]}"
-    dependencies_dir=$(cd "$ORIGINAL_PWD"; cd "$(dirname "$dependencies_dir")"; pwd)"/"$(basename "$dependencies_dir")
+    dependencies_dir=$(abspath "$ORIGINAL_PWD" "$dependencies_dir")
     readonly dependencies_dir
 fi
 
