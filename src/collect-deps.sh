@@ -243,23 +243,23 @@ fi
 ################################################################################
 
 # The given $main_project_dir must be a directory and must contain an executable gradlew.
-readonly gradle_exe="$main_project_dir/gradlew"
 if [ ! -e "$main_project_dir" ]; then
     echo_err "gradle project not found in '$main_project_dir': No such directory"
     exit 1
 elif [ ! -d "$main_project_dir" ]; then
     echo_err "gradle project not found in '$main_project_dir': It is not directory"
     exit 1
-elif [ ! -e "$gradle_exe" ]; then
-    echo_err "cannot find gradle wrapper '$gradle_exe': No such file"
+elif [ ! -e "$main_project_dir/gradlew" ]; then
+    echo_err "cannot find gradle wrapper '$main_project_dir/gradlew': No such file"
     exit 1
-elif [ -d "$gradle_exe" ]; then
-    echo_err "cannot find gradle wrapper '$gradle_exe': It is directory"
+elif [ -d "$main_project_dir/gradlew" ]; then
+    echo_err "cannot find gradle wrapper '$main_project_dir/gradlew': It is directory"
     exit 1
-elif [ ! -x "$gradle_exe" ] ; then
-    echo_err "cannot find gradle wrapper '$gradle_exe': Non-executable"
+elif [ ! -x "$main_project_dir/gradlew" ] ; then
+    echo_err "cannot find gradle wrapper '$main_project_dir/gradlew': Non-executable"
     exit 1
 fi
+readonly gradle_exe="./gradlew"
 
 # The given $output_dir must be an empty directory or nonexistent.
 if [ -e "$output_dir" ]; then
