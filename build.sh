@@ -58,9 +58,11 @@ readonly PROJECT_DIR="$SCRIPT_DIR"
 
 readonly SRC_DIR="$PROJECT_DIR/src"
 
-readonly DEST_DIR="$PROJECT_DIR/build/dest"
+readonly WORK_DIR=${GDV_BUILD_WORK_DIR-"$PROJECT_DIR/build"}
 
-readonly RELEASE_DIR="$PROJECT_DIR/build/release"
+readonly DEST_DIR="$WORK_DIR/dest"
+
+readonly RELEASE_DIR="$WORK_DIR/release"
 
 # The version number of this application
 GRADLE_DEPENDENCE_VIEWER_VERSION=$(cat "$PROJECT_DIR/.version")
