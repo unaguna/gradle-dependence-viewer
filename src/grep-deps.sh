@@ -85,6 +85,10 @@ function usage_exit () {
     exit "$1"
 }
 
+function echo_version() {
+    echo "$GRADLE_DEPENDENCE_VIEWER_APP_NAME $GRADLE_DEPENDENCE_VIEWER_VERSION"
+}
+
 function echo_help () {
     echo "$GRADLE_DEPENDENCE_VIEWER_APP_NAME $GRADLE_DEPENDENCE_VIEWER_VERSION"
     echo ""
@@ -123,6 +127,7 @@ function echo_err() {
 declare -i argc=0
 declare -a argv=()
 dependencies_dir_list=()
+version_flg=1
 help_flg=1
 invalid_option_flg=1
 while (( $# > 0 )); do
@@ -136,6 +141,8 @@ while (( $# > 0 )); do
             if [[ "$1" == '-d' ]]; then
                 dependencies_dir_list+=( "$2" )
                 shift
+            elif [[ "$1" == "--version" ]]; then
+                version_flg=0
             elif [[ "$1" == "--help" ]]; then
                 help_flg=0
                 # Ignore other arguments when displaying help
@@ -163,6 +170,11 @@ fi
 
 if [ "$help_flg" -eq 0 ]; then
     echo_help
+    exit 0
+fi
+
+if [ "$version_flg" -eq 0 ]; then
+    echo_version
     exit 0
 fi
 
