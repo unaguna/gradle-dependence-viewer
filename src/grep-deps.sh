@@ -212,4 +212,6 @@ fi
 # main
 ################################################################################
 
-grep "${keywords[@]}" -r "$collection_dir" | grep -v '(*)' | sed -e 's@^.*- @@g'  | sort -u
+readonly collection_deps_dir="$collection_dir/dependencies"
+
+grep "${keywords[@]}" -r "$collection_deps_dir" | grep -v '(*)' | sed -e 's@^.*- @@g'  | sort -u

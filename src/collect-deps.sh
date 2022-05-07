@@ -322,10 +322,15 @@ tmpfile_list+=( "$tmp_tasks_path" )
 
 cd "$main_project_dir"
 
+readonly output_deps_dir="$output_dir/dependencies"
+
 # create the directory where output
 if [ -n "$output_dir" ]; then
     # If output_dir already exists, it does not matter if it is empty, so use the -p option to avoid an error.
     mkdir -p "$output_dir"
+fi
+if [ -n "$output_deps_dir" ]; then
+    mkdir "$output_deps_dir"
 fi
 
 # Get sub-projects list
@@ -357,12 +362,12 @@ while read -r project_row; do
     fi
 
     # Decide filepath where output.
-    output_file="$output_dir/$(stdout_filename "$project_name")"
+    output_deps_file="$output_deps_dir/$(stdout_filename "$project_name")"
 
     echo_info "Running '$task_name'" 
     set +e
     # To solve the below problem, specify the redirect /dev/null to stdin:
     # https://ja.stackoverflow.com/questions/30942/シェルスクリプト内でgradleを呼ぶとそれ以降の処理がなされない
-    "$gradle_exe" "$task_name" < /dev/null &> "$output_file"
+    "$gradle_exe" "$task_name" < /dev/null &> "$output_deps_file"
     set -e
 done < "$tmp_project_list_path"
