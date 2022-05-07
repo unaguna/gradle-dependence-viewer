@@ -328,6 +328,7 @@ cd "$main_project_dir"
 
 readonly output_deps_dir="$output_dir/dependencies"
 readonly app_version_path="$output_dir/$GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE-version.txt"
+readonly gradle_version_path="$output_dir/gradle-version.txt"
 
 # create the directory where output
 if [ -n "$output_dir" ]; then
@@ -340,6 +341,10 @@ fi
 
 # Output self version
 echo_version > "$app_version_path"
+
+# Get the gradle version
+echo_info "Loading gradle"
+"$gradle_exe" --version < /dev/null > "$gradle_version_path"
 
 # Get sub-projects list
 echo_info "Loading project list"
