@@ -63,6 +63,10 @@ readonly GRADLE_DEPENDENCE_VIEWER_VERSION
 GRADLE_DEPENDENCE_VIEWER_APP_NAME="Gradle Dependence Viewer"
 export GRADLE_DEPENDENCE_VIEWER_APP_NAME
 readonly GRADLE_DEPENDENCE_VIEWER_APP_NAME
+# Application name
+GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE="gdv"
+export GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE
+readonly GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE
 
 
 ################################################################################
@@ -323,6 +327,7 @@ tmpfile_list+=( "$tmp_tasks_path" )
 cd "$main_project_dir"
 
 readonly output_deps_dir="$output_dir/dependencies"
+readonly app_version_path="$output_dir/$GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE-version.txt"
 
 # create the directory where output
 if [ -n "$output_dir" ]; then
@@ -332,6 +337,9 @@ fi
 if [ -n "$output_deps_dir" ]; then
     mkdir "$output_deps_dir"
 fi
+
+# Output self version
+echo_version > "$app_version_path"
 
 # Get sub-projects list
 echo_info "Loading project list"
