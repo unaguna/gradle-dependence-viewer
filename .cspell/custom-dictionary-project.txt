@@ -3,6 +3,9 @@ deps
 dfor
 prjoutput
 projectlist
+shellspec
+specfile
+specfiles
 tasklist
 taskoutput
 temurin
