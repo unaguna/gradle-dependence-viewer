@@ -63,6 +63,10 @@ readonly GRADLE_DEPENDENCE_VIEWER_VERSION
 GRADLE_DEPENDENCE_VIEWER_APP_NAME="Gradle Dependence Viewer"
 export GRADLE_DEPENDENCE_VIEWER_APP_NAME
 readonly GRADLE_DEPENDENCE_VIEWER_APP_NAME
+# Application name
+GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE="gdv"
+export GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE
+readonly GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE
 
 
 ################################################################################
@@ -81,18 +85,23 @@ source "$SCRIPT_DIR/libs/ana-gradle.sh"
 ################################################################################
 
 function usage_exit () {
-    echo "Usage:" "$(basename "$0") -d <dependencies_directory> <keywords> [...]" 1>&2
+    echo "Usage:" "$(basename "$0") -d <collection_directory> <keywords> [...]" 1>&2
     exit "$1"
+}
+
+function echo_version() {
+    echo "$GRADLE_DEPENDENCE_VIEWER_APP_NAME $GRADLE_DEPENDENCE_VIEWER_VERSION"
 }
 
 function echo_help () {
     echo "$GRADLE_DEPENDENCE_VIEWER_APP_NAME $GRADLE_DEPENDENCE_VIEWER_VERSION"
     echo ""
-    echo "Usage:" "$(basename "$0") -d <dependencies_directory> <keywords> [...]"
+    echo "Usage:" "$(basename "$0") -d <collection_directory> <keywords> [...]"
     echo ""
     echo "Options"
-    echo "    -d <dependencies_directory> :"
-    echo "         (Required) Path of the directory where the dependence trees have been output."
+    echo "    -d <collection_directory> :"
+    echo "         (Required) Path of the directory which has been specified as"
+    echo "         output_directory for collect-deps."
     echo ""
     echo "Arguments"
     echo "    <keywords> [...] :"
@@ -122,7 +131,8 @@ function echo_err() {
 ################################################################################
 declare -i argc=0
 declare -a argv=()
-dependencies_dir_list=()
+collection_dir_list=()
+version_flg=1
 help_flg=1
 invalid_option_flg=1
 while (( $# > 0 )); do
@@ -134,8 +144,10 @@ while (( $# > 0 )); do
             ;;
         -*)
             if [[ "$1" == '-d' ]]; then
-                dependencies_dir_list+=( "$2" )
+                collection_dir_list+=( "$2" )
                 shift
+            elif [[ "$1" == "--version" ]]; then
+                version_flg=0
             elif [[ "$1" == "--help" ]]; then
                 help_flg=0
                 # Ignore other arguments when displaying help
@@ -166,6 +178,11 @@ if [ "$help_flg" -eq 0 ]; then
     exit 0
 fi
 
+if [ "$version_flg" -eq 0 ]; then
+    echo_version
+    exit 0
+fi
+
 if [ "$invalid_option_flg" -eq 0 ]; then
     usage_exit 1
 fi
@@ -176,12 +193,12 @@ fi
 
 # (Required) destination directory path
 # it must be given only once; no more once
-if [ "${#dependencies_dir_list[@]}" -ne 1 ] || [ -z "${dependencies_dir_list[0]:-""}" ]; then
+if [ "${#collection_dir_list[@]}" -ne 1 ] || [ -z "${collection_dir_list[0]:-""}" ]; then
     usage_exit 1
 else
-    dependencies_dir="${dependencies_dir_list[0]}"
-    dependencies_dir=$(abspath "$ORIGINAL_PWD" "$dependencies_dir")
-    readonly dependencies_dir
+    collection_dir="${collection_dir_list[0]}"
+    collection_dir=$(abspath "$ORIGINAL_PWD" "$collection_dir")
+    readonly collection_dir
 fi
 
 
@@ -189,8 +206,8 @@ fi
 # Validate arguments
 ################################################################################
 
-if [ ! -d "$dependencies_dir" ]; then
-    echo_err "Not directory: $dependencies_dir"
+if [ ! -d "$collection_dir" ]; then
+    echo_err "Not directory: $collection_dir"
     exit 1
 fi
 
@@ -199,4 +216,6 @@ fi
 # main
 ################################################################################
 
-grep "${keywords[@]}" -r "$dependencies_dir" | grep -v '(*)' | sed -e 's@^.*- @@g'  | sort -u
+readonly collection_deps_dir="$collection_dir/dependencies"
+
+grep "${keywords[@]}" -r "$collection_deps_dir" | grep -v '(*)' | sed -e 's@^.*- @@g'  | sort -u

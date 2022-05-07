@@ -63,6 +63,10 @@ readonly GRADLE_DEPENDENCE_VIEWER_VERSION
 GRADLE_DEPENDENCE_VIEWER_APP_NAME="Gradle Dependence Viewer"
 export GRADLE_DEPENDENCE_VIEWER_APP_NAME
 readonly GRADLE_DEPENDENCE_VIEWER_APP_NAME
+# Application name
+GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE="gdv"
+export GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE
+readonly GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE
 
 
 ################################################################################
@@ -83,6 +87,10 @@ source "$SCRIPT_DIR/libs/ana-gradle.sh"
 function usage_exit () {
     echo "Usage:" "$(basename "$0") -d <output_directory> <main_project_directory>" 1>&2
     exit "$1"
+}
+
+function echo_version() {
+    echo "$GRADLE_DEPENDENCE_VIEWER_APP_NAME $GRADLE_DEPENDENCE_VIEWER_VERSION"
 }
 
 function echo_help () {
@@ -174,6 +182,7 @@ readonly INIT_GRADLE="$SCRIPT_DIR/libs/init.gradle"
 declare -i argc=0
 declare -a argv=()
 output_dir_list=()
+version_flg=1
 help_flg=1
 invalid_option_flg=1
 while (( $# > 0 )); do
@@ -187,6 +196,8 @@ while (( $# > 0 )); do
             if [[ "$1" == '-d' ]]; then
                 output_dir_list+=( "$2" )
                 shift
+            elif [[ "$1" == "--version" ]]; then
+                version_flg=0
             elif [[ "$1" == "--help" ]]; then
                 help_flg=0
                 # Ignore other arguments when displaying help
@@ -213,6 +224,11 @@ fi
 
 if [ "$help_flg" -eq 0 ]; then
     echo_help
+    exit 0
+fi
+
+if [ "$version_flg" -eq 0 ]; then
+    echo_version
     exit 0
 fi
 
@@ -310,11 +326,25 @@ tmpfile_list+=( "$tmp_tasks_path" )
 
 cd "$main_project_dir"
 
+readonly output_deps_dir="$output_dir/dependencies"
+readonly app_version_path="$output_dir/$GRADLE_DEPENDENCE_VIEWER_APP_NAME_SHORTAGE-version.txt"
+readonly gradle_version_path="$output_dir/gradle-version.txt"
+
 # create the directory where output
 if [ -n "$output_dir" ]; then
     # If output_dir already exists, it does not matter if it is empty, so use the -p option to avoid an error.
     mkdir -p "$output_dir"
 fi
+if [ -n "$output_deps_dir" ]; then
+    mkdir "$output_deps_dir"
+fi
+
+# Output self version
+echo_version > "$app_version_path"
+
+# Get the gradle version
+echo_info "Loading gradle"
+"$gradle_exe" --version < /dev/null > "$gradle_version_path"
 
 # Get sub-projects list
 echo_info "Loading project list"
@@ -345,12 +375,12 @@ while read -r project_row; do
     fi
 
     # Decide filepath where output.
-    output_file="$output_dir/$(stdout_filename "$project_name")"
+    output_deps_file="$output_deps_dir/$(stdout_filename "$project_name")"
 
     echo_info "Running '$task_name'" 
     set +e
     # To solve the below problem, specify the redirect /dev/null to stdin:
     # https://ja.stackoverflow.com/questions/30942/シェルスクリプト内でgradleを呼ぶとそれ以降の処理がなされない
-    "$gradle_exe" "$task_name" < /dev/null &> "$output_file"
+    "$gradle_exe" "$task_name" < /dev/null &> "$output_deps_file"
     set -e
 done < "$tmp_project_list_path"
