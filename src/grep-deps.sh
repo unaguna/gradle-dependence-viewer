@@ -103,7 +103,7 @@ function echo_help () {
     echo "         (Required) Path of the directory which has been specified as"
     echo "         output_directory for collect-deps."
     echo "    -c <configration> ... :"
-    echo "         A configration whose dependency tree are serached. If this option is"
+    echo "         A configration whose dependency tree is serached. If this option is"
     echo "         specified more than once, all the specified configurations are"
     echo "         searched, and if any one or more of them contains the keyword, it will"
     echo "         be shown. If omitted, all configrations will be searched."
