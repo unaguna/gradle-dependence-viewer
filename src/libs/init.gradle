@@ -3,28 +3,6 @@ import org.gradle.api.tasks.diagnostics.internal.dependencies.AsciiDependencyRep
 
 import java.nio.file.Files
 
-rootProject {
-    task 'projectlist' {
-        doFirst {
-            def output = file(getProperty("jp.unaguna.prjoutput"))
-            allprojects {
-                output.append "${project.path} ${projectDir.absolutePath}\n"
-            }
-        }
-    }
-
-    task 'tasklist' {
-        doFirst {
-            def output = file(getProperty("jp.unaguna.taskoutput"))
-            allprojects {
-                tasks.forEach { task ->
-                    output.append "${task.path}\n"
-                }
-            }
-        }
-    }
-}
-
 allprojects {
     task 'eachDependencies' {
         doFirst {
