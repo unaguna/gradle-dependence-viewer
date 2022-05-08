@@ -1,20 +1,30 @@
-rootProject {
-    task 'projectlist' {
-        doFirst {
-            def output = file(getProperty("jp.unaguna.prjoutput"))
-            allprojects {
-                output.append "${project.path} ${projectDir.absolutePath}\n"
-            }
-        }
-    }
+import org.gradle.api.tasks.diagnostics.internal.ProjectDetails
+import org.gradle.api.tasks.diagnostics.internal.dependencies.AsciiDependencyReportRenderer
 
-    task 'tasklist' {
+import java.nio.file.Files
+
+allprojects {
+    task 'eachDependencies' {
         doFirst {
-            def output = file(getProperty("jp.unaguna.taskoutput"))
-            allprojects {
-                tasks.forEach { task ->
-                    output.append "${task.path}\n"
-                }
+            final outputBaseDir = file(getProperty("jp.unaguna.depsoutput"))
+            final sortedConfigurations = new TreeSet<>(Comparator.comparing(Configuration::getName))
+            sortedConfigurations.addAll(configurations)
+            for (final configuration : sortedConfigurations) {
+                final configurationOutputDir = file("${outputBaseDir}/${configuration.name}")
+                Files.createDirectories(configurationOutputDir.toPath())
+
+                final projectStr = project == rootProject
+                        ? 'root'
+                        : project.path.replace(":", "__")
+
+                final renderer = new AsciiDependencyReportRenderer()
+                renderer.setOutputFile(file("${configurationOutputDir}/${projectStr}.txt"))
+                renderer.startProject(ProjectDetails.of(project))
+                renderer.startConfiguration(configuration)
+                renderer.render(configuration)
+                renderer.completeConfiguration(configuration)
+                renderer.completeProject(ProjectDetails.of(project))
+                renderer.complete()
             }
         }
     }

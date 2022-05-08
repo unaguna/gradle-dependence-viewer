@@ -123,52 +123,6 @@ function echo_err() {
     echo "$SCRIPT_NAME: $*" >&2
 }
 
-# Output the name of the file to be used as the output destination for stdout of gradle task.
-#
-# Arguments
-#   $1 - sub-project name
-#
-# Standard Output
-#   the filename, not filepath
-function stdout_filename() {
-    local -r project_name=$1
-
-    local -r project_name_esc=${project_name//:/__}
-
-    echo "${project_name_esc:-"root"}.txt"
-}
-
-# Check if the specified string is a name of sub-project
-#
-# Arguments
-#   $1: a string
-#   $2: the path of the project table
-#
-# Returns
-#   Returns 0 if the specified string is a name of sub-project.
-#   Returns 1 otherwise.
-function is_sub_project () {
-    local -r sub_project_name=${1#:}
-    local -r project_list_path=$2
-
-    # The root project is not sub-project
-    if [ -z "$sub_project_name" ]; then
-        return 1
-    fi
-
-    set +e
-    awk '{print $1}' "$project_list_path" | grep -e "^:${sub_project_name}$" &> /dev/null
-    result=$?
-    set -e
-
-    if [ $result -ne 0 ] && [ $result -ne 1 ]; then
-        echo_err "Failed to reference the temporary file created: $project_list_path"
-        exit $result
-    fi
-
-    return $result
-}
-
 ################################################################################
 # Constant values
 ################################################################################
@@ -293,32 +247,6 @@ fi
 # Temporally files
 ################################################################################
 
-# All temporally files which should be deleted on exit
-tmpfile_list=( )
-
-function remove_tmpfile {
-    set +e
-    for tmpfile in "${tmpfile_list[@]}"
-    do
-        if [ -e "$tmpfile" ]; then
-            rm -f "$tmpfile"
-        fi
-    done
-    set -e
-}
-trap remove_tmpfile EXIT
-trap 'trap - EXIT; remove_tmpfile; exit -1' INT PIPE TERM
-
-# the output of `gradle projects`
-tmp_project_list_path=$(mktemp)
-readonly tmp_project_list_path
-tmpfile_list+=( "$tmp_project_list_path" )
-
-# the output of `gradle tasks`
-tmp_tasks_path=$(mktemp)
-readonly tmp_tasks_path
-tmpfile_list+=( "$tmp_tasks_path" )
-
 
 ################################################################################
 # main
@@ -346,41 +274,6 @@ echo_version > "$app_version_path"
 echo_info "Loading gradle"
 "$gradle_exe" --version < /dev/null > "$gradle_version_path"
 
-# Get sub-projects list
-echo_info "Loading project list"
-"$gradle_exe" projectlist --init-script "$INIT_GRADLE" "-Pjp.unaguna.prjoutput=$tmp_project_list_path" < /dev/null > /dev/null
-sort "$tmp_project_list_path" -o "$tmp_project_list_path"
-
-# get task list
-echo_info "Loading task list"
-"$gradle_exe" tasklist --init-script "$INIT_GRADLE" "-Pjp.unaguna.taskoutput=$tmp_tasks_path" < /dev/null > /dev/null
-
-# Read each build.gradle and run each :dependencies.
-while read -r project_row; do
-    project_name=$(awk '{print $1}' <<< "$project_row")
-    if [ "$project_name" == ":" ]; then
-        project_name=""
-    fi
-    task_name="${project_name}:dependencies"
-
-    # Even if the build.gradle file exists, 
-    # ignore it if the dependencies task of this module does not exists
-    if ! task_exists "$task_name" "$tmp_tasks_path"; then
-        if [ -z "$project_name" ]; then
-            echo_info "'$task_name' is skipped; the root project doesn't have a task 'dependencies'."
-        else
-            echo_info "'$task_name' is skipped; the project '$project_name' doesn't have a task 'dependencies'."
-        fi
-        continue
-    fi
-
-    # Decide filepath where output.
-    output_deps_file="$output_deps_dir/$(stdout_filename "$project_name")"
-
-    echo_info "Running '$task_name'" 
-    set +e
-    # To solve the below problem, specify the redirect /dev/null to stdin:
-    # https://ja.stackoverflow.com/questions/30942/シェルスクリプト内でgradleを呼ぶとそれ以降の処理がなされない
-    "$gradle_exe" "$task_name" < /dev/null &> "$output_deps_file"
-    set -e
-done < "$tmp_project_list_path"
+# get dependencies
+echo_info "Loading dependencies"
+"$gradle_exe" eachDependencies --init-script "$INIT_GRADLE" "-Pjp.unaguna.depsoutput=$output_deps_dir" < /dev/null > /dev/null
