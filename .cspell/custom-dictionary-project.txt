@@ -1,5 +1,6 @@
 abspath
 deps
+depsoutput
 dfor
 prjoutput
 projectlist

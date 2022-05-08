@@ -355,32 +355,6 @@ sort "$tmp_project_list_path" -o "$tmp_project_list_path"
 echo_info "Loading task list"
 "$gradle_exe" tasklist --init-script "$INIT_GRADLE" "-Pjp.unaguna.taskoutput=$tmp_tasks_path" < /dev/null > /dev/null
 
-# Read each build.gradle and run each :dependencies.
-while read -r project_row; do
-    project_name=$(awk '{print $1}' <<< "$project_row")
-    if [ "$project_name" == ":" ]; then
-        project_name=""
-    fi
-    task_name="${project_name}:dependencies"
-
-    # Even if the build.gradle file exists, 
-    # ignore it if the dependencies task of this module does not exists
-    if ! task_exists "$task_name" "$tmp_tasks_path"; then
-        if [ -z "$project_name" ]; then
-            echo_info "'$task_name' is skipped; the root project doesn't have a task 'dependencies'."
-        else
-            echo_info "'$task_name' is skipped; the project '$project_name' doesn't have a task 'dependencies'."
-        fi
-        continue
-    fi
-
-    # Decide filepath where output.
-    output_deps_file="$output_deps_dir/$(stdout_filename "$project_name")"
-
-    echo_info "Running '$task_name'" 
-    set +e
-    # To solve the below problem, specify the redirect /dev/null to stdin:
-    # https://ja.stackoverflow.com/questions/30942/シェルスクリプト内でgradleを呼ぶとそれ以降の処理がなされない
-    "$gradle_exe" "$task_name" < /dev/null &> "$output_deps_file"
-    set -e
-done < "$tmp_project_list_path"
+# get dependencies
+echo_info "Loading dependencies"
+"$gradle_exe" eachDependencies --init-script "$INIT_GRADLE" "-Pjp.unaguna.depsoutput=$output_deps_dir" < /dev/null > /dev/null
