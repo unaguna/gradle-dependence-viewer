@@ -33,9 +33,7 @@ allprojects {
             sortedConfigurations.addAll(configurations)
             for (final configuration : sortedConfigurations) {
                 final configurationOutputDir = file("${outputBaseDir}/${configuration.name}")
-                if(!Files.isDirectory(configurationOutputDir.toPath())) {
-                    Files.createDirectory(configurationOutputDir.toPath())
-                }
+                Files.createDirectories(configurationOutputDir.toPath())
 
                 final projectStr = project == rootProject
                         ? 'root'
