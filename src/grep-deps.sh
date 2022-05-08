@@ -96,12 +96,17 @@ function echo_version() {
 function echo_help () {
     echo "$GRADLE_DEPENDENCE_VIEWER_APP_NAME $GRADLE_DEPENDENCE_VIEWER_VERSION"
     echo ""
-    echo "Usage:" "$(basename "$0") -d <collection_directory> <keywords> [...]"
+    echo "Usage:" "$(basename "$0") -d <collection_directory> [-c <configration> ...] <keywords> [...]"
     echo ""
     echo "Options"
     echo "    -d <collection_directory> :"
     echo "         (Required) Path of the directory which has been specified as"
     echo "         output_directory for collect-deps."
+    echo "    -c <configration> ... :"
+    echo "         A configration whose dependency tree are serached. If this option is"
+    echo "         specified more than once, all the specified configurations are"
+    echo "         searched, and if any one or more of them contains the keyword, it will"
+    echo "         be shown. If omitted, all configrations will be searched."
     echo ""
     echo "Arguments"
     echo "    <keywords> [...] :"
@@ -132,6 +137,7 @@ function echo_err() {
 declare -i argc=0
 declare -a argv=()
 collection_dir_list=()
+configration_list=()
 version_flg=1
 help_flg=1
 invalid_option_flg=1
@@ -145,6 +151,9 @@ while (( $# > 0 )); do
         -*)
             if [[ "$1" == '-d' ]]; then
                 collection_dir_list+=( "$2" )
+                shift
+            elif [[ "$1" == '-c' ]]; then
+                configration_list+=( "$2" )
                 shift
             elif [[ "$1" == "--version" ]]; then
                 version_flg=0
@@ -218,4 +227,13 @@ fi
 
 readonly collection_deps_dir="$collection_dir/dependencies"
 
-grep "${keywords[@]}" -r "$collection_deps_dir" | grep -v '(*)' | sed -e 's@^.*- @@g'  | sort -u
+# Build args for grep
+configration_args=()
+for configration in "${configration_list[@]}"; do
+    configration_args+=( '-r' "$collection_deps_dir/$configration" )
+done
+if [ "${#configration_args[@]}" -le 0 ]; then
+    configration_args=( '-r' "$collection_deps_dir" )
+fi
+
+grep "${keywords[@]}" "${configration_args[@]}" | grep -v '(*)' | sed -e 's@^.*- @@g'  | sort -u
